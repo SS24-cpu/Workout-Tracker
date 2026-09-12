@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#15171A; --surface:#1E2124; --surface-2:#262A2E; --text:#F0EDE8; --text-dim:#A3A7AC; --muted:#82868C;
+    --rose:#5C8DE8; --teal:#E2735C; --line:#33373C; --good:#7FB08F; --warn:#DDA85F;
+    --shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:0.2px;}
+  .wrap{max-width:640px;margin:0 auto;padding:22px 16px 70px;}
+  header{margin-bottom:20px;}
+  header h1{font-size:30px;margin:0 0 3px;letter-spacing:0.3px;}
+  header p{margin:0;color:var(--muted);font-size:14px;}
+  .badge-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
+  .week-badge{display:inline-block;padding:6px 13px;border:1px solid var(--rose);border-radius:100px;font-size:12.5px;color:var(--rose);font-weight:600;}
+  .week-edit-btn{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;padding:4px;}
+  .save-status{font-size:12px;color:var(--muted);}
+  .toolbar-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .toolbar-btn{background:none;border:1px solid var(--line);color:var(--text-dim);font-size:12.5px;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;}
+  .week-strip{background:var(--surface);border-radius:16px;padding:16px;margin-bottom:20px;border:1px solid var(--line);box-shadow:var(--shadow);}
+  .week-strip-title{font-size:12.5px;color:var(--teal);font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.6px;}
+  .week-days{display:flex;gap:8px;justify-content:space-between;}
+  .week-day{flex:1;text-align:center;background:none;border:none;padding:0;cursor:pointer;font-family:'Inter',sans-serif;}
+  .week-day-circle{width:100%;aspect-ratio:1;max-width:44px;margin:0 auto 6px;border-radius:50%;background:var(--surface-2);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);transition:all 0.2s;}
+  .week-day.done .week-day-circle{background:var(--good);border-color:var(--good);color:#0F1210;font-weight:700;}
+  .week-day.active .week-day-circle{border-color:var(--rose);border-width:2px;}
+  .week-day-label{font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:0.3px;}
+  .week-day.done .week-day-label{color:var(--good);}
+  .week-day.active .week-day-label{color:var(--rose);}
+  .panel{margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);}
+  .panel-hint{font-size:12.5px;color:var(--text-dim);line-height:1.5;margin:0 0 10px;}
+  .panel-btn{width:100%;padding:9px;border-radius:8px;border:none;background:var(--teal);color:#0E1116;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:8px;}
+  .panel-textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;padding:8px;margin-bottom:8px;resize:none;}
+  .panel-msg{font-size:12px;color:var(--good);min-height:16px;}
+  .cal-week-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;}
+  .cal-week-row:last-child{border-bottom:none;}
+  .cal-week-label{font-size:13.5px;font-weight:700;}
+  .cal-week-dots{display:flex;gap:4px;}
+  .cal-dot{width:8px;height:8px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);}
+  .cal-dot.done{background:var(--good);border-color:var(--good);}
+  .cal-detail{padding:10px 0;}
+  .day-title{font-size:24px;margin:0 0 4px;}
+  .section-label{font-size:12.5px;text-transform:uppercase;letter-spacing:0.6px;color:var(--teal);font-weight:700;margin:24px 0 12px;padding-top:16px;border-top:1px solid var(--line);}
+  .section-label:first-of-type{border-top:none;padding-top:0;}
+  .note-card{background:var(--surface);border-radius:14px;padding:16px;margin-bottom:16px;color:var(--text-dim);font-size:13.5px;line-height:1.55;border-left:3px solid var(--teal);box-shadow:var(--shadow);}
+  .hr-goal-card{background:linear-gradient(135deg, rgba(92,141,232,0.18), rgba(226,115,92,0.10));border:1px solid var(--teal);border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:var(--shadow);}
+  .hr-goal-title{font-size:13px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;}
+  .hr-goal-value{font-size:26px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .hr-goal-sub{font-size:13px;color:var(--text-dim);line-height:1.5;}
+
+  .card{background:var(--surface);border-radius:14px;margin-bottom:10px;border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;}
+  .card.logged-flag{border-color:var(--good);}
+  .card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;gap:10px;}
+  .card-header-left{display:flex;align-items:center;gap:10px;min-width:0;}
+  .card-check{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;}
+  .card.logged-flag .card-check{background:var(--good);border-color:var(--good);color:#0F1210;}
+  .ex-name{font-size:15.5px;font-weight:700;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .card-header-right{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+  .ex-range{font-size:12.5px;color:var(--muted);white-space:nowrap;font-weight:600;text-align:right;}
+  .ex-range-sub{font-size:10.5px;color:var(--muted);opacity:0.7;text-align:right;}
+  .chevron{font-size:12px;color:var(--muted);transition:transform 0.25s;}
+  .card-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 16px;}
+  .card-body-inner{padding-bottom:16px;}
+  .ex-note{font-size:12.5px;color:var(--muted);margin:0 0 10px;font-style:italic;line-height:1.4;}
+  .rest-label{font-size:12px;color:var(--teal);margin:0 0 10px;font-weight:600;}
+  .last-log{font-size:12.5px;color:var(--text-dim);margin:0 0 12px;background:var(--surface-2);border-radius:8px;padding:7px 10px;}
+
+  /* Set logging table — the redesigned part */
+  .set-table{background:var(--surface-2);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+  .set-table-head{display:grid;padding:9px 12px 7px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
+  .set-row{display:grid;align-items:center;padding:9px 12px;border-top:1px solid var(--line);gap:8px;}
+  .set-row.cols-4{grid-template-columns:34px 1fr 1fr 34px;}
+  .set-row.cols-3{grid-template-columns:34px 1fr 34px;}
+  .set-table-head.cols-4{grid-template-columns:34px 1fr 1fr 34px;}
+  .set-table-head.cols-3{grid-template-columns:34px 1fr 34px;}
+  .set-num{font-size:13px;color:var(--muted);font-weight:700;}
+  .set-field{display:flex;flex-direction:column;align-items:center;}
+  .set-field input{
+    width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--line);color:var(--text);
+    font-size:16px;font-weight:600;font-family:'Inter',sans-serif;text-align:center;padding:4px 0;
+  }
+  .set-field input:focus{outline:none;border-bottom-color:var(--rose);}
+  .set-clean-toggle{
+    justify-self:center;width:28px;height:28px;border-radius:8px;border:1px solid var(--good);
+    background:rgba(127,176,143,0.15);color:var(--good);font-size:14px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0;
+  }
+  .set-clean-toggle.dirty{border-color:var(--warn);background:rgba(221,168,95,0.15);color:var(--warn);}
+  .breakdown-row{display:flex;align-items:center;gap:8px;padding:0 6px 10px 42px;margin-top:-4px;}
+  .breakdown-row span{font-size:11px;color:var(--warn);white-space:nowrap;}
+  .breakdown-row input{width:60px;background:var(--surface-2);border:1px solid var(--line);border-radius:7px;color:var(--text);font-size:13px;padding:5px 8px;text-align:center;font-family:'Inter',sans-serif;}
+  .fill-row{display:flex;gap:8px;margin-bottom:10px;}
+  .effort-row{margin-bottom:10px;}
+  .effort-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;font-weight:700;margin-bottom:6px;}
+  .effort-btns{display:flex;gap:6px;}
+  .effort-btn{flex:1;padding:9px 4px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);font-size:11.5px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+  .effort-btn.active{border-color:var(--rose);background:rgba(92,141,232,0.15);color:var(--rose);}
+  .effort-btn.active[data-effort="max"]{border-color:var(--teal);background:rgba(226,115,92,0.15);color:var(--teal);}
+  .pain-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:9px 12px;border-radius:9px;background:var(--surface-2);}
+  .pain-toggle{background:none;border:1px solid var(--line);color:var(--muted);font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:7px;cursor:pointer;font-family:'Inter',sans-serif;}
+  .pain-toggle.active{border-color:#E65A46;background:rgba(230,90,70,0.15);color:#E65A46;}
+  .pain-banner{background:rgba(230,90,70,0.16);color:#E65A46;border:1px solid rgba(230,90,70,0.4);border-radius:9px;padding:9px 11px;font-size:12.5px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .pain-clear-btn{background:none;border:1px solid #E65A46;color:#E65A46;font-size:11px;padding:4px 9px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;white-space:nowrap;}
+  .fill-field{
+    flex:1;background:var(--surface-2);border-radius:9px;padding:8px 10px;display:flex;align-items:center;gap:6px;
+  }
+  .fill-field span{font-size:10.5px;color:var(--muted);white-space:nowrap;}
+  .fill-field input{width:100%;background:transparent;border:none;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;text-align:center;}
+  .fill-field input:focus{outline:none;}
+  .fill-btn{border-radius:9px;border:1px solid var(--line);background:var(--surface-2);color:var(--rose);font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;padding:0 14px;cursor:pointer;}
+
+  .card-actions{display:flex;gap:8px;margin-top:4px;}
+  .btn{flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+  .btn-primary{background:var(--rose);color:#0E1116;}
+  .feedback{margin-top:10px;font-size:13px;padding:10px 11px;border-radius:9px;line-height:1.4;}
+  .fb-progress{background:rgba(127,176,143,0.15);color:var(--good);}
+  .fb-hold{background:rgba(221,168,95,0.15);color:var(--warn);}
+  .fb-build{background:rgba(130,134,140,0.15);color:var(--muted);}
+  .fb-plateau{background:rgba(230,90,70,0.16);color:#E65A46;border:1px solid rgba(230,90,70,0.4);font-weight:600;}
+  .history{margin-top:8px;font-size:12px;color:var(--muted);}
+  .history-row{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid var(--line);}
+  .toggle-hist{background:none;border:none;color:var(--rose);font-size:12px;cursor:pointer;padding:6px 0;font-family:'Inter',sans-serif;font-weight:600;}
+  .circuit-btn{width:100%;padding:13px;border-radius:12px;border:none;background:var(--teal);color:#0E1116;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;font-family:'Inter',sans-serif;box-shadow:var(--shadow);}
+  .day-complete-btn{width:100%;padding:15px;border-radius:12px;border:none;background:var(--rose);color:#0E1116;font-size:15px;font-weight:700;cursor:pointer;margin-top:26px;box-shadow:var(--shadow);font-family:'Inter',sans-serif;}
+  .circuit-btn:disabled,.day-complete-btn:disabled{opacity:0.6;cursor:default;}
+  .results-panel{background:var(--surface);border-radius:14px;padding:4px 16px;margin-bottom:16px;border:1px solid var(--line);box-shadow:var(--shadow);}
+  .results-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);}
+  .results-row:last-child{border-bottom:none;}
+  .results-name{font-size:14px;font-weight:700;}
+  .results-reps{font-size:13px;color:var(--muted);white-space:nowrap;}
+  .badge{font-size:11px;font-weight:700;padding:4px 9px;border-radius:100px;white-space:nowrap;}
+  .badge-progress{background:rgba(127,176,143,0.18);color:var(--good);}
+  .badge-hold{background:rgba(221,168,95,0.18);color:var(--warn);}
+  .badge-build{background:rgba(130,134,140,0.18);color:var(--muted);}
+  .daylog-toggle{background:none;border:none;color:var(--rose);font-size:12.5px;font-weight:600;cursor:pointer;padding:4px 0 18px;font-family:'Inter',sans-serif;}
+  .daylog-entry{background:var(--surface);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--line);}
+  .daylog-head{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;}
+  .daylog-meta{font-size:11.5px;color:var(--muted);margin-bottom:8px;}
+  .daylog-change{font-size:12.5px;color:var(--text-dim);padding:3px 0;}
+  .wrapup-card{background:var(--surface);border-radius:16px;padding:22px;text-align:center;border:1px solid var(--good);box-shadow:var(--shadow);margin-bottom:16px;}
+  .wrapup-check{font-size:40px;color:var(--good);margin-bottom:8px;}
+  .wrapup-title{font-size:20px;font-weight:700;margin-bottom:14px;}
+  .view-anyway{background:none;border:none;color:var(--muted);font-size:12.5px;text-decoration:underline;cursor:pointer;font-family:'Inter',sans-serif;margin-top:10px;}
+  .notes-section{margin-top:28px;}
+  .notes-title{font-size:13px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;}
+  .notes-textarea{width:100%;min-height:110px;background:var(--surface);border:1px solid var(--line);border-radius:14px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:14px;resize:vertical;box-shadow:var(--shadow);line-height:1.5;}
+  .notes-textarea:focus{outline:1px solid var(--rose);}
+  .notes-saved{font-size:11.5px;color:var(--muted);margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Training Log</h1>
+    <p>Tap a day, tap an exercise, log the work.</p>
+    <div class="badge-row">
+      <div class="week-badge" id="weekBadge">—</div>
+      <button type="button" id="editWeekBtn" class="week-edit-btn" title="Fix the week number if it's wrong">✎ edit</button>
+      <div class="save-status" id="saveStatus">Not logged yet</div>
+    </div>
+    <div id="weekEditPanel" class="panel" style="display:none;">
+      <p class="panel-hint">Set the week number manually — useful if a mistake in logging bumped it wrong.</p>
+      <div style="display:flex;gap:8px;">
+        <input type="number" id="weekEditInput" class="panel-textarea" style="margin-bottom:0;text-align:center;font-size:16px;">
+        <button type="button" id="weekEditSaveBtn" class="panel-btn" style="width:auto;padding:0 16px;margin-bottom:0;">Save</button>
+      </div>
+    </div>
+    <div class="toolbar-row">
+      <button type="button" id="backupToggle" class="toolbar-btn">Backup / restore</button>
+      <button type="button" id="calendarToggle" class="toolbar-btn">📅 Calendar</button>
+      <button type="button" id="measureToggle" class="toolbar-btn">📏 Measurements</button>
+      <button type="button" id="weekSummaryToggle" class="toolbar-btn">📋 Week Summary</button>
+    </div>
+    <div id="weekSummaryPanel" class="panel" style="display:none;"></div>
+    <div id="measurePanel" class="panel" style="display:none;">
+      <p class="panel-hint">Rep logs don't show your actual physique goals — this does. Log every 2-4 weeks, same time of day, for it to mean anything.</p>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <input type="number" id="measWeight" placeholder="Weight (lb)" style="flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:8px;text-align:center;font-family:'Inter',sans-serif;">
+        <input type="number" id="measWaist" placeholder="Waist (in)" style="flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:8px;text-align:center;font-family:'Inter',sans-serif;">
+        <input type="number" id="measHips" placeholder="Hips (in)" style="flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:13px;padding:8px;text-align:center;font-family:'Inter',sans-serif;">
+      </div>
+      <button type="button" id="measSaveBtn" class="panel-btn">Log measurement</button>
+      <div id="measList"></div>
+    </div>
+    <div id="backupPanel" class="panel" style="display:none;">
+      <p class="panel-hint">Your progress now saves automatically in this browser — no code needed for normal use. This is only for moving your data to a different browser or device, or as an extra backup.</p>
+      <button type="button" id="getCodeBtn" class="panel-btn">Get code</button>
+      <textarea id="codeOut" class="panel-textarea" readonly rows="3" placeholder="Your code will appear here"></textarea>
+      <textarea id="codeIn" class="panel-textarea" rows="3" placeholder="Paste your saved code here to restore"></textarea>
+      <button type="button" id="restoreBtn" class="panel-btn">Restore from code</button>
+      <div id="backupMsg" class="panel-msg"></div>
+    </div>
+    <div id="calendarPanel" class="panel" style="display:none;"></div>
+  </header>
+
+  <div id="weekStripContainer"></div>
+  <div id="dayContent"></div>
+
+  <div class="notes-section">
+    <div class="notes-title">Notes</div>
+    <textarea id="notesArea" class="notes-textarea" placeholder="Anything worth remembering — how a session felt, an injury tweak, a schedule note..."></textarea>
+    <div class="notes-saved" id="notesSaved"></div>
+  </div>
+</div>
+
+<script>
+const START_DATE = new Date('2026-03-12T00:00:00');
+function currentWeek(){
+  const now = new Date();
+  const diffDays = Math.floor((now - START_DATE) / 86400000) + 1;
+  return Math.ceil(diffDays / 7);
+}
+const CALENDAR_WEEK = currentWeek();
+let currentCycleWeek = CALENDAR_WEEK; // will be overridden by loadFromLocalStorage if a saved value exists
+function updateWeekBadge(){
+  document.getElementById('weekBadge').textContent = 'Week ' + currentCycleWeek + ' since March 12, 2026';
+}
+updateWeekBadge();
+
+function closeOtherPanels(exceptId){
+  ['weekEditPanel','backupPanel','calendarPanel','measurePanel','weekSummaryPanel'].forEach(id=>{
+    if(id !== exceptId) document.getElementById(id).style.display = 'none';
+  });
+}
+
+document.getElementById('editWeekBtn').onclick = ()=>{
+  closeOtherPanels('weekEditPanel');
+  const panel = document.getElementById('weekEditPanel');
+  const opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if(opening) document.getElementById('weekEditInput').value = currentCycleWeek;
+};
+document.getElementById('weekEditSaveBtn').onclick = ()=>{
+  const val = parseInt(document.getElementById('weekEditInput').value);
+  if(isNaN(val) || val < 1){ return; }
+  currentCycleWeek = val;
+  STORE.currentCycleWeek = val;
+  updateWeekBadge();
+  persistToLocalStorage();
+  document.getElementById('weekEditPanel').style.display = 'none';
+};
+
+function setSaveStatus(){
+  const el = document.getElementById('saveStatus');
+  const t = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  el.textContent = 'Saved ✓ ' + t;
+  el.className = 'save-status ok';
+}
+function persistToLocalStorage(){
+  try{ localStorage.setItem('trainingLogStore', JSON.stringify(STORE)); }
+  catch(e){ console.error('local save failed', e); }
+}
+function loadFromLocalStorage(){
+  try{
+    const raw = localStorage.getItem('trainingLogStore');
+    if(raw){
+      const parsed = JSON.parse(raw);
+      STORE.exercises = parsed.exercises || {};
+      STORE.cycleProgress = parsed.cycleProgress || {};
+      STORE.calendarWeeks = parsed.calendarWeeks || {};
+      STORE.dayLogs = parsed.dayLogs || [];
+      STORE.notes = parsed.notes || '';
+      STORE.pendingDayResults = parsed.pendingDayResults || {};
+      STORE.currentCycleWeek = parsed.currentCycleWeek || null;
+      STORE.program = parsed.program || null;
+      STORE.customRest = parsed.customRest || {};
+      STORE.customCapped = parsed.customCapped || [];
+      STORE.measurements = parsed.measurements || [];
+      STORE.weekSummaries = parsed.weekSummaries || {};
+      if(STORE.program) PROGRAM = STORE.program;
+    }
+  }catch(e){ console.error('local load failed', e); }
+}
+function ex(id,name,sets,repMin,repMax,weight,unit,startTarget,note){
+  return { id, name, sets, repMin, repMax, weight, unit, startTarget, note };
+}
+
+let PROGRAM = {
+  d1: { label: 'Day 1', title: 'Lower Body Strength', sections: [
+    { label: 'Explosive Touch', exercises: [
+      ex('d1-broadjump','Broad Jumps',3,3,5,0,'BW',null,'light second weekly explosive touch — do this first while fresh.'),
+    ]},
+    { label: null, exercises: [
+      ex('d1-squat','Barbell Squat',3,6,10,30,'lb/side',10),
+      ex('d1-rdl','RDL',3,8,12,30,'lb',12,'glute-focused variation'),
+      ex('d1-hipthrust','Hip Thrust',4,10,15,35,'lb',15),
+      ex('d1-legcurl','Leg Curl',4,10,15,80,'lb',12),
+      ex('d1-stepup','Step-Ups',3,8,12,15,'lb',8,'per leg — box/bench at knee height, dumbbells in hand. Swapped in for Reverse Lunges — high glute EMG activation, simpler setup than Bulgarian split squats.'),
+      ex('d1-calf','Calf Raise',3,10,15,25,'lb',15),
+    ]}
+  ]},
+  d2: { label: 'Day 2', title: 'Upper Body Strength', sections: [
+    { label: 'Pull-Up Frequency', exercises: [
+      ex('d2-scap','Scapular Pull-Ups',2,6,8,0,'BW',null,'pull-up frequency touch (with Day 3 = 2x/week).'),
+      ex('d2-negative','Negative Pull-Up',2,2,2,0,'sec',null,'2–3 sec controlled descent'),
+    ]},
+    { label: null, exercises: [
+      ex('d2-curl','Standing DB Curls',3,5,6,30,'lb',5,'progress normally, no cap'),
+      ex('d2-bayesian','Bayesian Curls',3,8,12,15,'lb',12),
+      ex('d2-press','DB Chest Press',3,6,10,30,'lb',10),
+      ex('d2-row','Seated Cable Row',3,8,12,80,'lb',9),
+      ex('d2-pushdown','Straight-Bar Pushdowns',3,8,12,35,'lb',10),
+      ex('d2-ohtri','Overhead Triceps',3,8,10,15,'lb',10),
+      ex('d2-lateral','Lateral Raises',2,8,12,15,'lb',10,'capped — maintenance only'),
+    ]}
+  ]},
+  d3: { label: 'Day 3', title: 'Calisthenics + Pull-Up + Core + Conditioning', sections: [
+    { label: 'Push-Up Development', exercises: [
+      ex('d3-pushup','Full Push-Ups',3,3,5,0,'BW',4,'target 4 clean'),
+      ex('d3-incline','Incline Push-Ups',2,8,12,0,'BW',8,'target 8'),
+    ]},
+    { label: 'Pull-Up Development', exercises: [
+      ex('d3-pullattempt','Unassisted Pull-Up Attempt',1,0,1,0,'BW',null,'1 serious attempt while fresh'),
+      ex('d3-scap','Scapular Pull-Ups',2,6,8,0,'BW',8,'pull-up frequency touch, 2 of 2/week'),
+      ex('d3-negative','Jump-Assisted Negative Pull-Ups',3,2,2,0,'sec',null,'2-sec controlled descent'),
+      ex('d3-latpulldown','Single-Arm Lat Pulldown',3,8,12,30,'lb',null,'per arm. Auto-caps once you land an unassisted pull-up.'),
+    ]},
+    { label: 'Lower Body Addition', exercises: [
+      ex('d3-glute','Banded Hip Thrust',4,12,15,0,'BW',null,'second weekly glute session (with Day 1) — 8 sets/week total, intermediate range.'),
+    ]},
+    { label: 'Core Circuit — 3 rounds', exercises: [
+      ex('d3-crunch','Cable Crunch',3,10,15,55,'lb',15),
+      ex('d3-legraise','Bench Straight-Leg Raises',3,8,12,0,'BW',12),
+      ex('d3-pallof','Pallof Press',3,10,15,20,'lb',15,'per side'),
+      ex('d3-russian','Russian Twists',3,20,20,25,'lb',null,'total, 10/side — capped'),
+      ex('d3-deadbug','Weighted Dead Bugs',3,8,12,25,'lb',12,'per side'),
+      ex('d3-sidebend','Cable Side Bends',3,10,15,17.5,'lb',null,'per side — capped'),
+    ]},
+  ], note: 'Conditioning: 15 min steady cardio (run or StairMaster) after the circuit.' },
+  d4a: { label: 'Day 4A', title: 'Athletic Performance', sections: [
+    { label: 'Athletic Conditioning Circuit — 3 rounds', exercises: [
+      ex('d4a-thruster','DB Thrusters',3,6,10,15,'lb',8,'add load once top of range is easy and fast'),
+      ex('d4a-snatch','Alternating DB Snatches',3,6,8,15,'lb',8,'total, 4/side — already exceeding, treat as maxed'),
+      ex('d4a-pushup','Full Push-Ups',3,6,10,0,'BW',8,'explosive'),
+      ex('d4a-punch','Cable Cross Punches',3,8,12,10,'lb',10,'per side — capped'),
+      ex('d4a-gorilla','Gorilla Rows',3,8,10,20,'lb',10,'total'),
+      ex('d4a-bounds','Lateral Bounds',3,6,8,0,'BW',8,'total'),
+    ]},
+    { label: 'Arm Finisher — 3 rounds', exercises: [
+      ex('d4a-hammer','Cross-Body Hammer Curl',3,6,8,30,'lb',6,'no cap'),
+      ex('d4a-pushdown','Straight-Bar Pushdown',3,8,12,30,'lb',10),
+    ]},
+    { label: 'Core Finisher — 2 rounds', exercises: [
+      ex('d4a-crunch','Cable Crunch',2,10,15,50,'lb',12),
+      ex('d4a-pallof','Pallof Press',2,10,15,20,'lb',12,'per side'),
+    ]},
+  ], note: 'HIIT — 8 rounds: 30 sec @ 7.5 mph / 60 sec @ 6% incline.' },
+  d4b: { label: 'Day 4B', title: 'Explosive / Athletic Circuit', sections: [
+    { label: 'Circuit — 3 rounds', exercises: [
+      ex('d4b-pogo','Pogos',3,20,20,0,'BW'),
+      ex('d4b-boxjump','Box Jumps',3,6,10,0,'BW',9,'stop early if landing quality drops'),
+      ex('d4b-slam','Ball Slams',3,8,12,0,'BW',11),
+      ex('d4b-highknees','Explosive High Knees',3,20,20,0,'sec',null,'box-supported'),
+      ex('d4b-jumpsquat','Jump Squats',3,6,8,0,'BW',8,'stop if jump height falls'),
+      ex('d4b-kneepushup','Knee Push-Ups',3,8,12,0,'BW',11,'higher-rep endurance version'),
+      ex('d4b-shuffle','Lateral Shuffles',3,20,20,0,'sec'),
+    ]},
+    { label: 'Arm Finisher — 3 rounds', exercises: [
+      ex('d4b-hammer','Cross-Body Hammer Curls',3,6,8,25,'lb',7,'per arm — no cap'),
+      ex('d4b-pushdown','Straight-Bar Pushdowns',3,8,12,35,'lb',9),
+    ]},
+    { label: 'Core Finisher — 2 rounds', exercises: [
+      ex('d4b-crunch','Cable Crunch',2,10,15,50,'lb',12),
+      ex('d4b-pallof','Pallof Press',2,10,15,20,'lb',12,'per side'),
+    ]},
+  ], note: 'Boxing finisher: weighted shadowboxing, 8 rounds. 4A/4B alternate weekly.' },
+  d5: { label: 'Day 5', title: 'Zone 2 Cardio', hrGoal: { value: '115–133 bpm', sub: 'Moderate effort — full sentences, breathing harder than resting, never gasping. Fat-burn/endurance work; asthma-appropriate. Vigorous effort belongs on Day 4A.' },
+    warmup: [
+      'Cat-Cow — 10 slow reps',
+      "World's Greatest Stretch — 5 per side",
+      '90/90 Hip Switches — 8 per side',
+      'Ankle Circles — 10 each direction, both feet',
+    ], sections: [
+    { label: 'Cardio — 45–60 min total, pick blocks that add up', exercises: [
+      ex('d5-treadmill','Treadmill (slow jog)',1,15,15,15,'min',null,'zone 2: 115–133 bpm. ~2.8–3.0mph held 5+ min to settle.'),
+      ex('d5-stairmaster','StairMaster (level 4)',1,15,20,15,'min',null,'zone 2: 115–133 bpm. Level 4 confirmed at 133bpm.'),
+      ex('d5-inclinewalk','Incline Walk',1,20,35,30,'min',null,'zone 2: 115–133 bpm.'),
+      ex('d5-bike','Stationary Bike',1,10,20,10,'min',null,'optional 4th option — swap in for variety, same zone 2 target.'),
+    ]},
+  ], note: 'The lever for "run longer/perform longer" — endurance comes from time in zone, not intensity. Mix and match blocks to reach 45–60 min total.' },
+};
+
+const REST_MAP = {
+  'd1-squat':120,'d1-rdl':105,'d1-hipthrust':90,'d1-legcurl':75,'d1-stepup':75,'d1-calf':60,'d1-broadjump':90,
+  'd2-curl':60,'d2-bayesian':60,'d2-press':90,'d2-row':75,'d2-pushdown':60,'d2-ohtri':60,'d2-lateral':45,
+  'd2-scap':75,'d2-negative':90,
+  'd3-pushup':90,'d3-incline':60,
+  'd3-pullattempt':120,'d3-scap':75,'d3-negative':105,'d3-latpulldown':90,'d3-glute':75,
+  'd3-crunch':100,'d3-legraise':100,'d3-pallof':100,'d3-russian':100,'d3-deadbug':100,'d3-sidebend':100,
+  'd4a-thruster':75,'d4a-snatch':75,'d4a-pushup':75,'d4a-punch':75,'d4a-gorilla':75,'d4a-bounds':75,
+  'd4a-hammer':120,'d4a-pushdown':120,'d4a-crunch':75,'d4a-pallof':75,
+  'd4b-pogo':60,'d4b-boxjump':75,'d4b-slam':75,'d4b-highknees':75,'d4b-jumpsquat':75,'d4b-kneepushup':60,'d4b-shuffle':60,
+  'd4b-hammer':75,'d4b-pushdown':75,'d4b-crunch':60,'d4b-pallof':75,
+  'd5-treadmill':0,'d5-stairmaster':0,'d5-inclinewalk':0,'d5-bike':0,
+};
+function restFor(id){ return STORE.customRest[id] ?? REST_MAP[id] ?? 60; }
+function isCapped(id){ return CAPPED_IDS.has(id) || STORE.customCapped.includes(id); }
+function restLabel(sec){ return sec>=60 ? (sec%60===0 ? sec/60+' min' : (sec/60).toFixed(1)+' min') : sec+'s'; }
+
+const CAPPED_IDS = new Set(['d2-lateral','d3-russian','d3-sidebend','d4a-punch']);
+const EXACT_REP_DAYS = new Set(['d1','d2','d3','d4a','d4b']);
+const NO_LOAD_UNITS = new Set(['BW','sec']);
+const WEEK_DAY_KEYS = ['d1','d2','d3','d4a','d4b','d5'];
+// Exercises where weight is tracked per set (real lb work). BW/sec/min stay single-value.
+function hasPerSetWeight(exercise){ return !NO_LOAD_UNITS.has(exercise.unit) && exercise.unit !== 'min'; }
+
+const STORE = { exercises:{}, cycleProgress:{}, calendarWeeks:{}, dayLogs:[], notes:'', pendingDayResults:{}, currentCycleWeek:null, program:null, customRest:{}, customCapped:[], measurements:[], weekSummaries:{} };
+
+async function loadExercise(id){
+  return STORE.exercises[id] || { weight:null, history:[], lastIncrease:null, targetReps:null, stallCount:0 };
+}
+async function undoLastLog(id){
+  const data = await loadExercise(id);
+  if(data.history.length === 0) return null;
+  const snap = data.undoSnapshot || null;
+  const restored = {
+    weight: snap ? snap.weight : data.weight,
+    targetReps: snap ? snap.targetReps : data.targetReps,
+    stallCount: snap ? snap.stallCount : data.stallCount,
+    lastIncrease: snap ? snap.lastIncrease : data.lastIncrease,
+    painFlag: data.painFlag || false,
+    history: data.history.slice(0, -1),
+    undoSnapshot: null
+  };
+  await saveExercise(id, restored);
+  return restored;
+}
+async function saveExercise(id, data){ STORE.exercises[id] = data; setSaveStatus(); persistToLocalStorage(); return true; }
+function exportCode(){ return btoa(unescape(encodeURIComponent(JSON.stringify(STORE)))); }
+function importCode(code){
+  const parsed = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+  STORE.exercises = parsed.exercises || {};
+  STORE.cycleProgress = parsed.cycleProgress || {};
+  STORE.calendarWeeks = parsed.calendarWeeks || {};
+  STORE.dayLogs = parsed.dayLogs || [];
+  STORE.notes = parsed.notes || '';
+  STORE.pendingDayResults = parsed.pendingDayResults || {};
+  STORE.currentCycleWeek = parsed.currentCycleWeek || null;
+  STORE.program = parsed.program || null;
+  STORE.customRest = parsed.customRest || {};
+  STORE.customCapped = parsed.customCapped || [];
+  STORE.measurements = parsed.measurements || [];
+  STORE.weekSummaries = parsed.weekSummaries || {};
+  if(STORE.program) PROGRAM = STORE.program;
+  if(STORE.currentCycleWeek){ currentCycleWeek = STORE.currentCycleWeek; updateWeekBadge(); }
+  document.getElementById('notesArea').value = STORE.notes;
+  renderMeasureList();
+}
+document.getElementById('backupToggle').onclick = ()=>{
+  closeOtherPanels('backupPanel');
+  const panel = document.getElementById('backupPanel');
+  panel.style.display = panel.style.display==='none' ? 'block' : 'none';
+};
+document.getElementById('getCodeBtn').onclick = ()=>{
+  const out = document.getElementById('codeOut');
+  out.value = exportCode(); out.focus(); out.select();
+  document.getElementById('backupMsg').textContent = 'Code ready — tap the box above, select all, copy it.';
+};
+document.getElementById('restoreBtn').onclick = ()=>{
+  const input = document.getElementById('codeIn').value;
+  const msg = document.getElementById('backupMsg');
+  if(!input.trim()){ msg.textContent = 'Paste a code first.'; msg.style.color = 'var(--warn)'; return; }
+  try{
+    importCode(input);
+    persistToLocalStorage();
+    msg.textContent = 'Restored.'; msg.style.color = 'var(--good)';
+    renderWeekStrip(); renderDay(activeDay);
+  }catch(e){ msg.textContent = 'That code didn\'t look right.'; msg.style.color = 'var(--warn)'; }
+};
+document.getElementById('calendarToggle').onclick = ()=>{
+  closeOtherPanels('calendarPanel');
+  const panel = document.getElementById('calendarPanel');
+  const opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if(opening) renderCalendar();
+};
+document.getElementById('measureToggle').onclick = ()=>{
+  closeOtherPanels('measurePanel');
+  const panel = document.getElementById('measurePanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if(panel.style.display === 'block') renderMeasureList();
+};
+document.getElementById('weekSummaryToggle').onclick = ()=>{
+  closeOtherPanels('weekSummaryPanel');
+  const panel = document.getElementById('weekSummaryPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if(panel.style.display === 'block') renderWeekSummary();
+};
+function buildSummaryData(weekNum){
+  const progressed = STORE.dayLogs.filter(l => l.week === weekNum).flatMap(l => l.changes);
+  const needsConfirm = [];
+  const plateaued = [];
+  Object.keys(PROGRAM).forEach(dayKey => {
+    PROGRAM[dayKey].sections.forEach(section => {
+      section.exercises.forEach(exercise => {
+        const data = STORE.exercises[exercise.id];
+        if(!data) return;
+        if((data.confirmCount || 0) === 1) needsConfirm.push(exercise.name);
+        if((data.stallCount || 0) >= 3) plateaued.push(exercise.name);
+      });
+    });
+  });
+  return { progressed, needsConfirm, plateaued };
+}
+function summaryHTML(summary, weekLabel, savedNote){
+  const section = (title, color, items, emptyMsg) => `
+    <div style="font-size:12px;color:${color};font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin:16px 0 8px;">${title} (${items.length})</div>
+    ${items.length ? items.map(i => `<div class="results-row"><span class="results-name" style="font-size:13px;">${i}</span></div>`).join('') : `<p class="panel-hint">${emptyMsg}</p>`}
+  `;
+  return `<div class="panel-hint" style="margin-bottom:0;">${weekLabel}${savedNote ? ' · '+savedNote : ''}</div>` +
+    section('✓ Progressed', 'var(--good)', summary.progressed, 'Nothing progressed.') +
+    section('1 of 2 — needs one more clean hit', 'var(--rose)', summary.needsConfirm, 'Nothing waiting on a confirmation.') +
+    section('⚠ Plateaued — deload or swap', '#E65A46', summary.plateaued, 'Nothing plateaued.');
+}
+function captureWeekSummary(weekNum){
+  STORE.weekSummaries[weekNum] = { ...buildSummaryData(weekNum), timestamp: new Date().toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) };
+  persistToLocalStorage();
+}
+function renderWeekSummary(){
+  const panel = document.getElementById('weekSummaryPanel');
+  const summary = buildSummaryData(currentCycleWeek);
+  panel.innerHTML = summaryHTML(summary, `Week ${currentCycleWeek} — current cycle so far.`, null) +
+    `<button type="button" id="saveSnapshotBtn" class="panel-btn" style="margin-top:14px;">💾 Save a snapshot of this week</button>
+     <p class="panel-hint" style="margin-top:6px;">This locks in what you see now so you can look back at it later, even after the cycle resets. A full snapshot also saves automatically when you finish Day 5.</p>`;
+  document.getElementById('saveSnapshotBtn').onclick = ()=>{
+    captureWeekSummary(currentCycleWeek);
+    document.getElementById('saveSnapshotBtn').textContent = 'Saved ✓';
+  };
+}
+document.getElementById('measSaveBtn').onclick = ()=>{
+  const weight = parseFloat(document.getElementById('measWeight').value);
+  const waist = parseFloat(document.getElementById('measWaist').value);
+  const hips = parseFloat(document.getElementById('measHips').value);
+  if(isNaN(weight) && isNaN(waist) && isNaN(hips)) return;
+  STORE.measurements.push({
+    date: new Date().toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'}),
+    weight: isNaN(weight) ? null : weight,
+    waist: isNaN(waist) ? null : waist,
+    hips: isNaN(hips) ? null : hips
+  });
+  persistToLocalStorage();
+  document.getElementById('measWeight').value = '';
+  document.getElementById('measWaist').value = '';
+  document.getElementById('measHips').value = '';
+  renderMeasureList();
+};
+function renderMeasureList(){
+  const list = document.getElementById('measList');
+  if(!list) return;
+  if(STORE.measurements.length === 0){ list.innerHTML = ''; return; }
+  list.innerHTML = STORE.measurements.slice().reverse().map(m => `
+    <div class="results-row">
+      <span class="results-name" style="font-size:12.5px;">${m.date}</span>
+      <span class="results-reps">${m.weight?m.weight+' lb':''} ${m.waist?'· waist '+m.waist+'"':''} ${m.hips?'· hips '+m.hips+'"':''}</span>
+    </div>
+  `).join('');
+}
+function renderCalendar(){
+  const panel = document.getElementById('calendarPanel');
+  const weeks = Object.keys(STORE.calendarWeeks).map(Number).sort((a,b)=>b-a);
+  if(weeks.length===0){ panel.innerHTML = `<p class="panel-hint">No completed days logged yet this session.</p>`; return; }
+  panel.innerHTML = `<div class="panel-hint" style="margin-bottom:4px;">Past weeks — tap one to see what you logged.</div>` +
+    weeks.map(w => {
+      const wd = STORE.calendarWeeks[w] || {};
+      return `<div class="cal-week-row" data-week="${w}"><span class="cal-week-label">Week ${w}</span><span class="cal-week-dots">${WEEK_DAY_KEYS.map(k=>`<span class="cal-dot ${wd[k]?'done':''}"></span>`).join('')}</span></div>`;
+    }).join('');
+  panel.querySelectorAll('.cal-week-row').forEach(row=>{
+    row.onclick = ()=>{
+      const w = Number(row.dataset.week);
+      const existing = panel.querySelector('.cal-detail');
+      if(existing){ const was = existing.dataset.week === String(w); existing.remove(); if(was) return; }
+      const detail = document.createElement('div'); detail.className = 'cal-detail'; detail.dataset.week = String(w);
+      const logs = STORE.dayLogs.filter(l => l.week === w);
+      const savedSummary = STORE.weekSummaries[w];
+      let html = savedSummary
+        ? summaryHTML(savedSummary, `Saved summary for Week ${w}`, savedSummary.timestamp)
+        : '';
+      html += `<div style="font-size:12px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin:16px 0 8px;">Day-by-day log</div>`;
+      html += logs.length ? logs.map(log => `
+        <div class="daylog-entry"><div class="daylog-head">${PROGRAM[log.day].label} — ${PROGRAM[log.day].title}</div>
+        <div class="daylog-meta">${log.timestamp}</div>
+        ${log.changes.length ? log.changes.map(c=>`<div class="daylog-change">${c}</div>`).join('') : '<div class="daylog-change">No changes — held steady.</div>'}</div>
+      `).join('') : '<p class="panel-hint">No detailed logs for this week.</p>';
+      detail.innerHTML = html;
+      row.insertAdjacentElement('afterend', detail);
+    };
+  });
+}
+const notesArea = document.getElementById('notesArea');
+notesArea.oninput = ()=>{ STORE.notes = notesArea.value; persistToLocalStorage(); document.getElementById('notesSaved').textContent = 'Saved ✓'; };
+
+// ---- Core logging logic ----
+// weights: array parallel to reps (or null for no-weight exercises). Different
+// sets can carry different weights (e.g. 25/25/30) — progression uses the last set.
+// breakdownReps: optional array parallel to reps — the rep number form broke
+// down at, for sets marked not-clean. If the last set's breakdown happened
+// after the actual target was already hit clean, that set counts as clean
+// for progression purposes (bonus reps failing doesn't erase a clean pass).
+async function computeLog(exercise, exactMode, weights, reps, cleanFlags, effort, painFlagged, breakdownReps){
+  if(!cleanFlags) cleanFlags = reps.map(()=>true);
+  if(!effort) effort = 'moderate';
+  const perSet = hasPerSetWeight(exercise);
+  const weightVal = perSet ? weights[weights.length-1] : (weights ? weights[0] : null);
+  const data = await loadExercise(exercise.id);
+
+  let effectiveCleanFlags = cleanFlags.slice();
+  let breakdownNote = null;
+  if(exactMode && breakdownReps){
+    const lastIdx = reps.length - 1;
+    const b = breakdownReps[lastIdx];
+    if(!cleanFlags[lastIdx] && b != null && !isNaN(b)){
+      const targetForCheck = Math.min(Math.max(data.targetReps ?? (exercise.startTarget ?? exercise.repMin), exercise.repMin), exercise.repMax);
+      if(b > targetForCheck){
+        effectiveCleanFlags[lastIdx] = true;
+        breakdownNote = `Broke down at rep ${b}, after already hitting the target (${targetForCheck}) clean — counts as a clean pass.`;
+      } else {
+        breakdownNote = `Broke down at rep ${b}, before reaching the target (${targetForCheck}) — doesn't count as clean.`;
+      }
+    }
+  }
+  const isClean = effectiveCleanFlags.every(Boolean);
+
+  const today = new Date().toISOString().slice(0,10);
+  const entry = { date: today, weights: perSet ? weights : null, weight: !perSet ? weightVal : null, sets: reps, clean: cleanFlags, effort, pain: painFlagged, breakdownReps: breakdownReps || null };
+  const preLogSnapshot = { weight: data.weight, targetReps: data.targetReps, stallCount: data.stallCount, lastIncrease: data.lastIncrease };
+  const persistedPain = painFlagged || data.painFlag || false;
+  const updated = { weight: data.weight ?? exercise.weight, history: [...data.history, entry], lastIncrease: data.lastIncrease ?? null, targetReps: data.targetReps ?? null, stallCount: data.stallCount ?? 0, confirmCount: data.confirmCount ?? 0, undoSnapshot: preLogSnapshot, painFlag: persistedPain };
+  let fbClass, fbText, target = null, change = null, intentionalHold = false;
+
+  if(exactMode){
+    // Clamp on read: self-heals any previously stored out-of-range target.
+    target = Math.min(Math.max(data.targetReps ?? (exercise.startTarget ?? exercise.repMin), exercise.repMin), exercise.repMax);
+    const lastSetReps = reps[reps.length-1];
+    // Judged by the last set, not every set — the last set is the real test
+    // under fatigue. Clean/safety still requires every set to be clean, though.
+    const metNumeric = lastSetReps >= target;
+    const met = metNumeric && isClean;
+    // Ceiling is judged by what you actually performed on your last set vs
+    // the real range max, not by arithmetic on the stored target.
+    const hitCeiling = lastSetReps >= exercise.repMax && isClean;
+
+    // Simple, no-exceptions rule: Max effort always holds, full stop — even
+    // if you happened to hit the true ceiling. If it stays maxed 3 sessions
+    // running, the plateau detector below already tells you to deload/swap —
+    // that's the correct signal here, not a silent auto-progression.
+    if(persistedPain){
+      updated.targetReps = target; updated.confirmCount = 0;
+      fbClass='fb-hold'; fbText=`⚠ Flagged for pain/issue. Holding regardless of performance — clear the flag once it's resolved before this progresses again.`;
+      intentionalHold = true;
+    } else if(metNumeric && !isClean){
+      fbClass='fb-build'; fbText=`Hit ${target} numerically, but at least one set wasn't clean. Repeat ${target} — every set clean.`;
+      updated.targetReps = target; updated.confirmCount = 0;
+    } else if(!met){
+      fbClass='fb-build'; fbText=`${lastSetReps} of ${target} on your last set. Repeat ${target} next session.`;
+      updated.targetReps = target; updated.confirmCount = 0;
+    } else if(effort === 'max'){
+      updated.targetReps = target; updated.confirmCount = 0;
+      fbClass='fb-hold'; fbText=`Hit ${target} clean at max effort. Holding — max effort never progresses, regardless of where you are in the range.`;
+    } else if(hitCeiling){
+      if(NO_LOAD_UNITS.has(exercise.unit)){
+        updated.targetReps = target;
+        fbClass='fb-progress'; fbText=`Maxed the range (${exercise.repMax}). Make it harder.`;
+        change = `${exercise.name}: maxed — increase difficulty`;
+      } else if(isCapped(exercise.id)){
+        updated.targetReps = target;
+        fbClass='fb-hold'; fbText=`At the ceiling and load-capped. Hold here.`; intentionalHold = true;
+      } else if(exercise.id === 'd3-latpulldown' && (await loadExercise('d3-pullattempt')).history.some(h => h.sets.some(r => r >= 1))){
+        updated.targetReps = target;
+        fbClass='fb-hold'; fbText=`Pull-up landed — this lift auto-caps now. Hold at ${weightVal} ${exercise.unit}.`; intentionalHold = true;
+      } else if(effort === 'easy'){
+        const increment = weightVal >= 50 ? 5 : (weightVal >= 15 ? 2.5 : 1.25);
+        const newWeight = Math.round((weightVal + increment)*4)/4;
+        updated.weight = newWeight; updated.targetReps = exercise.repMin; target = exercise.repMin; updated.confirmCount = 0;
+        fbClass='fb-progress'; fbText=`Maxed at ${weightVal} ${exercise.unit}, and easy — no need to confirm twice. Load → ${newWeight} ${exercise.unit}, target resets to ${exercise.repMin}.`;
+        change = `${exercise.name}: → ${newWeight} ${exercise.unit}`;
+      } else {
+        const confirms = (data.confirmCount || 0) + 1;
+        const confirmTarget = Math.min(Math.max(target, lastSetReps), exercise.repMax);
+        if(confirms < 2){
+          updated.targetReps = confirmTarget; updated.confirmCount = confirms; target = confirmTarget;
+          fbClass='fb-hold'; fbText=`Hit the ceiling (${exercise.repMax}) at ${weightVal} ${exercise.unit}. That's 1 of 2 — hit it clean again next session to confirm before the load goes up.`;
+        } else {
+          const increment = weightVal >= 50 ? 5 : (weightVal >= 15 ? 2.5 : 1.25);
+          const newWeight = Math.round((weightVal + increment)*4)/4;
+          updated.weight = newWeight; updated.targetReps = exercise.repMin; target = exercise.repMin; updated.confirmCount = 0;
+          fbClass='fb-progress'; fbText=`Confirmed 2 sessions running at ${weightVal} ${exercise.unit}. Load → ${newWeight} ${exercise.unit}, target resets to ${exercise.repMin}.`;
+          change = `${exercise.name}: → ${newWeight} ${exercise.unit}`;
+        }
+      }
+    } else {
+      const baseStep = (exercise.repMax - exercise.repMin) > 4 ? 2 : 1;
+      if(effort === 'easy'){
+        const step = baseStep * 2;
+        const newTarget = Math.min(Math.max(target + step, lastSetReps), exercise.repMax);
+        updated.targetReps = newTarget; target = newTarget; updated.confirmCount = 0;
+        fbClass='fb-progress'; fbText=`Hit it clean and easy — no need to confirm twice. Bigger jump, next target: ${newTarget}.`;
+        change = `${exercise.name}: → ${newTarget} reps`;
+      } else {
+        const confirms = (data.confirmCount || 0) + 1;
+        // Sync to what you actually did, even while holding for confirmation —
+        // it should never show a number lower than what you just performed.
+        const confirmTarget = Math.min(Math.max(target, lastSetReps), exercise.repMax);
+        if(confirms < 2){
+          updated.targetReps = confirmTarget; updated.confirmCount = confirms; target = confirmTarget;
+          fbClass='fb-hold'; fbText=`Hit ${confirmTarget} clean. That's 1 of 2 — hit ${confirmTarget} clean again next session to confirm before the target moves up.`;
+        } else {
+          const confirmedAt = confirmTarget;
+          const newTarget = Math.min(Math.max(confirmTarget + baseStep, lastSetReps), exercise.repMax);
+          updated.targetReps = newTarget; target = newTarget; updated.confirmCount = 0;
+          fbClass='fb-progress'; fbText=`Confirmed 2 sessions running at ${confirmedAt}. Next target: ${newTarget}.`;
+          change = `${exercise.name}: → ${newTarget} reps`;
+        }
+      }
+    }
+    updated.stallCount = fbClass === 'fb-progress' ? 0 : (data.stallCount || 0) + 1;
+    if(updated.stallCount >= 3 && !intentionalHold && !persistedPain){
+      fbClass = 'fb-plateau';
+      fbText = `${fbText} — ${updated.stallCount} sessions with no progress. That's a real plateau (research threshold: 3 consecutive stalls). Either take a selective deload here (drop ~50% load/reps this session, rebuild over 1-2 sessions) or swap this exercise for a variation for 4-6 weeks before returning to it.`;
+      change = change || `${exercise.name}: plateaued (${updated.stallCount} sessions) — deload or swap`;
+    }
+    if(breakdownNote){ fbText = `${fbText} (${breakdownNote})`; }
+    const ok = await saveExercise(exercise.id, updated);
+    return { fbClass, fbText, updated, target, change, saved: ok };
+  }
+
+  const atOrAboveTopNumeric = reps.every(r => r >= exercise.repMax);
+  const atOrAboveTop = atOrAboveTopNumeric && isClean;
+  const hitButNotClean = atOrAboveTopNumeric && !isClean;
+  const belowRange = reps.some(r => r < exercise.repMin);
+
+  if(persistedPain){
+    fbClass='fb-hold'; fbText=`⚠ Flagged for pain/issue. Holding regardless of performance — clear the flag once it's resolved.`;
+    intentionalHold = true;
+  } else if(exercise.unit === 'min'){
+    const completed = reps[0]; const t = weightVal;
+    const metMin = completed >= t && isClean;
+    if(completed >= t && !isClean){ fbClass='fb-hold'; fbText=`Hit ${t} min but marked not clean. Repeat before it counts.`; }
+    else if(metMin){
+      const daysSince = updated.lastIncrease ? Math.floor((new Date(today) - new Date(updated.lastIncrease))/86400000) : 14;
+      if(daysSince >= 14){
+        const newTarget = t + 5; updated.weight = newTarget; updated.lastIncrease = today;
+        fbClass='fb-progress'; fbText=`Hit ${t} min, time for a bump. New target: ${newTarget} min.`;
+        change = `${exercise.name}: → ${newTarget} min`;
+      } else { fbClass='fb-hold'; fbText=`Hit ${t} min — hold, only ${daysSince} day(s) since last bump.`; }
+    } else { fbClass='fb-build'; fbText=`${completed} of ${t} min. Repeat this target.`; }
+  } else if(exercise.unit === 'BW'){
+    if(hitButNotClean){ fbClass='fb-hold'; fbText=`Hit numerically but not clean. Repeat clean.`; }
+    else if(atOrAboveTop){ fbClass='fb-progress'; fbText=`Top of range, clean. Make it harder.`; change = `${exercise.name}: maxed — increase difficulty`; }
+    else if(belowRange){ fbClass='fb-build'; fbText=`Under range. Repeat, build reps.`; }
+    else { fbClass='fb-hold'; fbText=`In range, not at top. Same demand next time.`; }
+  } else if(isCapped(exercise.id)){
+    if(atOrAboveTopNumeric){ fbClass='fb-hold'; fbText=`Top of range at ${weightVal} ${exercise.unit}. Capped — hold.`; intentionalHold = true; }
+    else if(belowRange){ fbClass='fb-build'; fbText=`Under ${exercise.repMin} reps. Hold, build reps.`; }
+    else { fbClass='fb-hold'; fbText=`In range. Capped — hold.`; intentionalHold = true; }
+  } else if(exercise.id === 'd3-latpulldown'){
+    const pullData = await loadExercise('d3-pullattempt');
+    const gotPullup = pullData.history.some(h => h.sets.some(r => r >= 1));
+    if(gotPullup){ fbClass='fb-hold'; fbText=`Pull-up landed — auto-caps now. Hold at ${weightVal} ${exercise.unit}.`; intentionalHold = true; }
+    else if(hitButNotClean){ fbClass='fb-hold'; fbText=`Top of range but not clean. Repeat before adding load.`; }
+    else if(atOrAboveTop){
+      const increment = weightVal >= 50 ? 5 : (weightVal >= 15 ? 2.5 : 1.25);
+      const newWeight = Math.round((weightVal + increment)*4)/4;
+      updated.weight = newWeight; fbClass='fb-progress'; fbText=`Top of range. Load → ${newWeight} ${exercise.unit}.`;
+      change = `${exercise.name}: → ${newWeight} ${exercise.unit}`;
+    } else if(belowRange){ fbClass='fb-build'; fbText=`Under ${exercise.repMin} reps. Hold, build back in.`; }
+    else { fbClass='fb-hold'; fbText=`In range, not at top. Stay at ${weightVal} ${exercise.unit}.`; }
+  } else {
+    if(hitButNotClean){ fbClass='fb-hold'; fbText=`Top of range but not clean. Repeat before adding load.`; }
+    else if(atOrAboveTop){
+      const increment = weightVal >= 50 ? 5 : (weightVal >= 15 ? 2.5 : 1.25);
+      const newWeight = Math.round((weightVal + increment)*4)/4;
+      updated.weight = newWeight; fbClass='fb-progress'; fbText=`Top of range. Load → ${newWeight} ${exercise.unit}.`;
+      change = `${exercise.name}: → ${newWeight} ${exercise.unit}`;
+    } else if(belowRange){ fbClass='fb-build'; fbText=`Under ${exercise.repMin} reps. Hold, build back in.`; }
+    else { fbClass='fb-hold'; fbText=`In range, not at top. Stay at ${weightVal} ${exercise.unit}.`; }
+  }
+  updated.stallCount = fbClass === 'fb-progress' ? 0 : (data.stallCount || 0) + 1;
+  if(updated.stallCount >= 3 && exercise.unit !== 'min' && !intentionalHold && !persistedPain){
+    fbClass = 'fb-plateau';
+    fbText = `${fbText} — ${updated.stallCount} sessions with no progress. That's a real plateau (research threshold: 3 consecutive stalls). Either take a selective deload here (drop ~50% load/reps this session, rebuild over 1-2 sessions) or swap this exercise for a variation for 4-6 weeks before returning to it.`;
+    change = change || `${exercise.name}: plateaued (${updated.stallCount} sessions) — deload or swap`;
+  }
+  const ok = await saveExercise(exercise.id, updated);
+  return { fbClass, fbText, updated, target, change, saved: ok };
+}
+
+function historyWeightsLabel(h, unit){
+  if(Array.isArray(h.weights)) return h.weights.join('/') + ' ' + unit + ' — ';
+  if(h.weight) return h.weight + ' ' + unit + ' — ';
+  return '';
+}
+
+function applyResultToCard(card, exercise, result){
+  showFeedback(card, result.fbClass, result.fbText);
+  card.querySelectorAll('.rep-field').forEach(f=>f.value='');
+  card.querySelectorAll('.set-clean-toggle').forEach(b=>{ b.dataset.clean='true'; b.classList.remove('dirty'); b.textContent='✓'; });
+  card.querySelectorAll('.breakdown-row').forEach(r=>{ r.style.display='none'; const f=r.querySelector('.breakdown-field'); if(f) f.value=''; });
+  card.querySelectorAll('.effort-btn').forEach(b=>b.classList.toggle('active', b.dataset.effort==='moderate'));
+  const painToggleReset = card.querySelector('.pain-toggle');
+  if(painToggleReset){ painToggleReset.dataset.pain='false'; painToggleReset.classList.remove('active'); painToggleReset.textContent='Flag it'; }
+  const perSet = hasPerSetWeight(exercise);
+  if(perSet && result.updated.weight != null){
+    card.querySelectorAll('.weight-field').forEach(f => f.value = result.updated.weight);
+  } else if(!perSet){
+    const wf = card.querySelector('.weight-field');
+    if(wf && result.updated.weight != null) wf.value = result.updated.weight;
+  }
+  const histBtn = card.querySelector('.toggle-hist');
+  if(histBtn){ histBtn.style.display = 'block'; histBtn.textContent = `History (${result.updated.history.length})`; }
+  const histDiv = card.querySelector('.history');
+  if(histDiv){
+    histDiv.innerHTML = result.updated.history.slice().reverse().map(h=>{
+      const anyDirty = Array.isArray(h.clean) ? h.clean.some(c=>!c) : h.clean===false;
+      return `<div class="history-row"><span>${h.date}${anyDirty?' ⚠':''}</span><span>${historyWeightsLabel(h, exercise.unit)}${h.sets.join(', ')}</span></div>`;
+    }).join('');
+  }
+  const rangeEl = card.querySelector('.ex-range');
+  if(rangeEl && result.target != null){ rangeEl.textContent = `${result.target} reps × ${exercise.sets}`; }
+  card.classList.add('logged-flag');
+
+  const existingBanner = card.querySelector('.pain-banner');
+  if(result.updated.painFlag && !existingBanner){
+    const banner = document.createElement('div');
+    banner.className = 'pain-banner';
+    banner.innerHTML = `<span>⚠ Flagged for pain/issue — progression is held until cleared.</span><button type="button" class="pain-clear-btn">Clear</button>`;
+    const lastLogEl = card.querySelector('.last-log');
+    const insertAfter = lastLogEl || card.querySelector('.rest-label');
+    insertAfter.insertAdjacentElement('afterend', banner);
+    banner.querySelector('.pain-clear-btn').onclick = async (e)=>{
+      e.stopPropagation();
+      const data = await loadExercise(exercise.id);
+      data.painFlag = false;
+      await saveExercise(exercise.id, data);
+      renderDay(activeDay, true);
+    };
+  } else if(!result.updated.painFlag && existingBanner){
+    existingBanner.remove();
+  }
+}
+function showFeedback(card, cls, text){
+  const slot = card.querySelector('.fb-slot');
+  if(slot) slot.innerHTML = `<div class="feedback ${cls}">${text}</div>`;
+}
+function badgeFor(fbClass){
+  if(fbClass==='fb-plateau') return '<span class="badge" style="background:rgba(230,90,70,0.2);color:#E65A46;">⚠ plateau</span>';
+  if(fbClass==='fb-progress') return '<span class="badge badge-progress">↑ progress</span>';
+  if(fbClass==='fb-build') return '<span class="badge badge-build">repeat</span>';
+  return '<span class="badge badge-hold">hold</span>';
+}
+function historyClean(h){ return Array.isArray(h.clean) ? h.clean.every(Boolean) : h.clean !== false; }
+function expandCard(card){
+  const body = card.querySelector('.card-body');
+  body.style.maxHeight = '900px';
+  const chev = card.querySelector('.chevron');
+  if(chev) chev.style.transform = 'rotate(180deg)';
+}
+function collapseCard(card){
+  const body = card.querySelector('.card-body');
+  body.style.maxHeight = '0px';
+  const chev = card.querySelector('.chevron');
+  if(chev) chev.style.transform = 'rotate(0deg)';
+}
+
+let weekStripEl = null;
+function renderWeekStrip(){
+  const container = document.getElementById('weekStripContainer');
+  container.innerHTML = '';
+  const strip = document.createElement('div'); strip.className = 'week-strip';
+  strip.innerHTML = `<div class="week-strip-title">This cycle</div>
+    <div class="week-days">
+      ${WEEK_DAY_KEYS.map(k => `
+        <button type="button" class="week-day ${STORE.cycleProgress[k]?.done?'done':''} ${k===activeDay?'active':''}" data-day="${k}">
+          <div class="week-day-circle">${STORE.cycleProgress[k]?.done?'✓':''}</div>
+          <div class="week-day-label">${PROGRAM[k].label.replace('Day ','D')}</div>
+        </button>
+      `).join('')}
+    </div>`;
+  container.appendChild(strip);
+  weekStripEl = strip;
+  strip.querySelectorAll('.week-day').forEach(btn=>{ btn.onclick = ()=> renderDay(btn.dataset.day); });
+}
+function highlightActiveDay(key){
+  if(!weekStripEl) return;
+  weekStripEl.querySelectorAll('.week-day').forEach(el=>{ el.classList.toggle('active', el.dataset.day === key); });
+}
+function markDayDoneVisual(key){
+  if(!weekStripEl) return;
+  const el = weekStripEl.querySelector(`[data-day="${key}"]`);
+  if(el){ el.classList.add('done'); el.querySelector('.week-day-circle').textContent = '✓'; }
+}
+function resetCycleVisual(){
+  if(!weekStripEl) return;
+  weekStripEl.querySelectorAll('.week-day').forEach(el=>{ el.classList.remove('done'); el.querySelector('.week-day-circle').textContent = ''; });
+}
+function renderDayLogHistory(){
+  const existing = document.getElementById('dayLogHistoryPanel');
+  if(existing) existing.remove();
+  if(STORE.dayLogs.length === 0) return;
+  const toggle = document.createElement('button');
+  toggle.type = 'button'; toggle.className = 'daylog-toggle'; toggle.id = 'dayLogHistoryPanel';
+  toggle.textContent = `View day log history (${STORE.dayLogs.length})`;
+  let expanded = null;
+  toggle.onclick = ()=>{
+    if(expanded){ expanded.remove(); expanded = null; toggle.textContent = `View day log history (${STORE.dayLogs.length})`; return; }
+    expanded = document.createElement('div');
+    expanded.innerHTML = STORE.dayLogs.slice().reverse().map(log => `
+      <div class="daylog-entry"><div class="daylog-head">${PROGRAM[log.day].label} — ${PROGRAM[log.day].title}</div>
+      <div class="daylog-meta">Week ${log.week} · ${log.timestamp}</div>
+      ${log.changes.length ? log.changes.map(c=>`<div class="daylog-change">${c}</div>`).join('') : '<div class="daylog-change">No changes.</div>'}</div>
+    `).join('');
+    toggle.insertAdjacentElement('afterend', expanded);
+    toggle.textContent = 'Hide day log history';
+  };
+  const dayCompleteBtn = document.querySelector('.day-complete-btn');
+  if(dayCompleteBtn) dayCompleteBtn.insertAdjacentElement('afterend', toggle);
+  else document.getElementById('dayContent').appendChild(toggle);
+}
+
+const contentEl = document.getElementById('dayContent');
+let activeDay = 'd1';
+
+function renderWrapUp(key){
+  contentEl.innerHTML = '';
+  const day = PROGRAM[key];
+  const state = STORE.cycleProgress[key];
+  const card = document.createElement('div'); card.className = 'wrapup-card';
+  card.innerHTML = `<div class="wrapup-check">✓</div><div class="wrapup-title">${day.label} complete</div>`;
+  const changesWrap = document.createElement('div'); changesWrap.className = 'results-panel'; changesWrap.style.textAlign = 'left';
+  changesWrap.innerHTML = (state.changes && state.changes.length)
+    ? state.changes.map(c=>`<div class="results-row"><span class="results-name">${c}</span></div>`).join('')
+    : `<div class="results-row" style="border-bottom:none;"><span class="results-name" style="font-weight:500;color:var(--muted);">No changes — everything held.</span></div>`;
+  contentEl.appendChild(card); contentEl.appendChild(changesWrap);
+  const viewBtn = document.createElement('button');
+  viewBtn.type = 'button'; viewBtn.className = 'view-anyway'; viewBtn.textContent = 'View full workout anyway';
+  viewBtn.onclick = ()=> renderDay(key, true);
+  contentEl.appendChild(viewBtn);
+  renderDayLogHistory();
+}
+
+function buildExerciseEditor(dayKey){
+  const day = PROGRAM[dayKey];
+  const panel = document.createElement('div');
+  panel.id = 'exerciseEditorPanel';
+  panel.className = 'panel';
+  panel.style.marginBottom = '20px';
+
+  const intro = document.createElement('p');
+  intro.className = 'panel-hint';
+  intro.textContent = 'Remove an exercise, or add a new one to any section below. Changes apply immediately and use the same progression logic as everything else.';
+  panel.appendChild(intro);
+
+  day.sections.forEach((section, sIdx) => {
+    const secWrap = document.createElement('div');
+    secWrap.style.marginBottom = '16px';
+    const secLabel = document.createElement('div');
+    secLabel.style.cssText = 'font-size:12px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;';
+    secLabel.textContent = section.label || 'General';
+    secWrap.appendChild(secLabel);
+
+    section.exercises.forEach((exercise, eIdx) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);';
+      row.innerHTML = `<span style="font-size:13.5px;">${exercise.name}</span>`;
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.textContent = 'Remove';
+      removeBtn.style.cssText = 'background:none;border:1px solid var(--line);color:var(--muted);font-size:11.5px;padding:5px 10px;border-radius:7px;cursor:pointer;font-family:\'Inter\',sans-serif;';
+      removeBtn.onclick = ()=>{
+        section.exercises.splice(eIdx, 1);
+        STORE.program = PROGRAM;
+        persistToLocalStorage();
+        renderDay(dayKey, true);
+      };
+      row.appendChild(removeBtn);
+      secWrap.appendChild(row);
+    });
+
+    const addForm = document.createElement('div');
+    addForm.style.cssText = 'margin-top:10px;background:var(--surface-2);border-radius:10px;padding:12px;';
+    addForm.innerHTML = `
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px;font-weight:700;">+ Add exercise to this section</div>
+      <input type="text" class="add-name" placeholder="Exercise name" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);font-size:13px;padding:8px;margin-bottom:6px;font-family:'Inter',sans-serif;">
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <input type="number" class="add-sets" placeholder="Sets" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);font-size:13px;padding:8px;text-align:center;font-family:'Inter',sans-serif;">
+        <input type="number" class="add-repmin" placeholder="Rep min" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);font-size:13px;padding:8px;text-align:center;font-family:'Inter',sans-serif;">
+        <input type="number" class="add-repmax" placeholder="Rep max" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);font-size:13px;padding:8px;text-align:center;font-family:'Inter',sans-serif;">
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <input type="number" class="add-weight" placeholder="Weight (0 if BW)" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);font-size:13px;padding:8px;text-align:center;font-family:'Inter',sans-serif;">
+        <select class="add-unit" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);font-size:13px;padding:8px;font-family:'Inter',sans-serif;">
+          <option value="lb">lb</option>
+          <option value="BW">bodyweight</option>
+          <option value="sec">seconds</option>
+          <option value="min">minutes</option>
+        </select>
+        <input type="number" class="add-rest" placeholder="Rest sec" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);font-size:13px;padding:8px;text-align:center;font-family:'Inter',sans-serif;">
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:8px;">
+        <input type="checkbox" class="add-capped"> Cap this exercise (no weight progression — for waist/shoulder work)
+      </label>
+      <button type="button" class="add-submit-btn" style="width:100%;padding:9px;border-radius:8px;border:none;background:var(--teal);color:#0E1116;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">Add exercise</button>
+    `;
+    const submitBtn = addForm.querySelector('.add-submit-btn');
+    submitBtn.onclick = ()=>{
+      const name = addForm.querySelector('.add-name').value.trim();
+      const sets = parseInt(addForm.querySelector('.add-sets').value) || 3;
+      const repMin = parseInt(addForm.querySelector('.add-repmin').value) || 8;
+      const repMax = parseInt(addForm.querySelector('.add-repmax').value) || 12;
+      const weight = parseFloat(addForm.querySelector('.add-weight').value) || 0;
+      const unit = addForm.querySelector('.add-unit').value;
+      const rest = parseInt(addForm.querySelector('.add-rest').value);
+      const capped = addForm.querySelector('.add-capped').checked;
+      if(!name){ return; }
+      const id = `custom-${dayKey}-${Date.now()}`;
+      section.exercises.push(ex(id, name, sets, repMin, repMax, weight, unit));
+      if(!isNaN(rest)) STORE.customRest[id] = rest;
+      if(capped) STORE.customCapped.push(id);
+      STORE.program = PROGRAM;
+      persistToLocalStorage();
+      renderDay(dayKey, true);
+    };
+    secWrap.appendChild(addForm);
+    panel.appendChild(secWrap);
+  });
+
+  return panel;
+}
+
+async function renderDay(key, forceOpen){
+  activeDay = key;
+  highlightActiveDay(key);
+  if(STORE.cycleProgress[key]?.done && !forceOpen){ renderWrapUp(key); return; }
+
+  const day = PROGRAM[key];
+  const exactMode = EXACT_REP_DAYS.has(key);
+  contentEl.innerHTML = '';
+  const dayResults = STORE.pendingDayResults[key] || (STORE.pendingDayResults[key] = []);
+
+  const titleEl = document.createElement('h2'); titleEl.className = 'day-title'; titleEl.textContent = day.title;
+  contentEl.appendChild(titleEl);
+
+  if(day.hrGoal){
+    const hrEl = document.createElement('div'); hrEl.className = 'hr-goal-card';
+    hrEl.innerHTML = `<div class="hr-goal-title">Heart Rate Target — Zone 2</div><div class="hr-goal-value">${day.hrGoal.value}</div><div class="hr-goal-sub">${day.hrGoal.sub}</div>`;
+    contentEl.appendChild(hrEl);
+  }
+  if(day.note){
+    const noteEl = document.createElement('div'); noteEl.className = 'note-card'; noteEl.textContent = day.note;
+    contentEl.appendChild(noteEl);
+  }
+  if(day.warmup){
+    const warmupEl = document.createElement('div'); warmupEl.className = 'note-card';
+    warmupEl.innerHTML = `<div style="color:var(--teal);font-weight:700;font-size:13px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Mobility Warm-Up — do this first</div>` +
+      day.warmup.map(w => `<div style="padding:3px 0;">• ${w}</div>`).join('');
+    contentEl.appendChild(warmupEl);
+  }
+
+  const editToggle = document.createElement('button');
+  editToggle.type = 'button';
+  editToggle.className = 'toolbar-btn';
+  editToggle.style.marginBottom = '16px';
+  editToggle.textContent = '✎ Edit this day\'s exercises';
+  editToggle.onclick = ()=>{
+    const existing = document.getElementById('exerciseEditorPanel');
+    if(existing){ existing.remove(); return; }
+    const panel = buildExerciseEditor(key);
+    editToggle.insertAdjacentElement('afterend', panel);
+  };
+  contentEl.appendChild(editToggle);
+
+  for(const section of day.sections){
+    const isCircuit = section.label && /round/i.test(section.label);
+    if(section.label){
+      const labelEl = document.createElement('div'); labelEl.className = 'section-label'; labelEl.textContent = section.label;
+      contentEl.appendChild(labelEl);
+    }
+    let circuitBtn = null;
+    if(isCircuit){
+      circuitBtn = document.createElement('button');
+      circuitBtn.type = 'button'; circuitBtn.className = 'circuit-btn';
+      circuitBtn.textContent = '✓ Completed circuit — log every exercise as prescribed';
+      contentEl.appendChild(circuitBtn);
+    }
+    const sectionCards = [];
+    let idx = 0;
+    for(const exercise of section.exercises){
+      const card = await renderExerciseCard(exercise, exactMode, dayResults);
+      contentEl.appendChild(card);
+      sectionCards.push({ card, exercise });
+      if(idx === 0) expandCard(card);
+      idx++;
+    }
+    sectionCards.forEach(({card}, i)=>{
+      card._advance = ()=>{
+        collapseCard(card);
+        const next = sectionCards[i+1];
+        if(next){ expandCard(next.card); setTimeout(()=>next.card.scrollIntoView({behavior:'smooth', block:'center'}), 150); }
+      };
+    });
+    if(circuitBtn){
+      circuitBtn.onclick = async ()=>{
+        circuitBtn.disabled = true; circuitBtn.textContent = 'Logging...';
+        try{
+          const rows = [];
+          for(const { card, exercise } of sectionCards){
+            const data = await loadExercise(exercise.id);
+            const perSet = hasPerSetWeight(exercise);
+            const wv = exercise.unit==='BW' ? null : (data.weight ?? exercise.weight);
+            const target = exactMode ? (data.targetReps ?? (exercise.startTarget ?? exercise.repMin)) : (exercise.unit==='min' ? wv : exercise.repMax);
+            const reps = Array(exercise.sets).fill(target);
+            const weights = perSet ? reps.map(()=>wv) : (exercise.unit==='min' ? [wv] : null);
+            const cleanFlags = reps.map(()=>true);
+            const result = await computeLog(exercise, exactMode, weights, reps, cleanFlags);
+            applyResultToCard(card, exercise, result);
+            collapseCard(card);
+            dayResults.push({ name: exercise.name, change: result.change });
+            persistToLocalStorage();
+            rows.push({ name: exercise.name, reps, unit: exercise.unit, fbClass: result.fbClass });
+          }
+          const panel = document.createElement('div'); panel.className = 'results-panel';
+          panel.innerHTML = rows.map(r => {
+            const repsLabel = r.unit==='sec' ? r.reps[0]+' sec' : r.unit==='min' ? r.reps[0]+' min' : r.reps.join(', ');
+            return `<div class="results-row"><span class="results-name">${r.name}</span><span class="results-reps">${repsLabel}</span>${badgeFor(r.fbClass)}</div>`;
+          }).join('');
+          circuitBtn.insertAdjacentElement('afterend', panel);
+          circuitBtn.style.display = 'none';
+        } catch(err){
+          console.error('circuit log failed', err);
+          circuitBtn.disabled = false; circuitBtn.textContent = 'Something went wrong — tap to retry';
+        }
+      };
+    }
+  }
+
+  const dayCompleteBtn = document.createElement('button');
+  dayCompleteBtn.type = 'button'; dayCompleteBtn.className = 'day-complete-btn';
+  dayCompleteBtn.textContent = '✓ Day complete — log results & progressions';
+  contentEl.appendChild(dayCompleteBtn);
+  renderDayLogHistory();
+
+  dayCompleteBtn.onclick = async ()=>{
+    const changes = dayResults.filter(r => r.change).map(r=>r.change);
+    STORE.cycleProgress[key] = { done: true, changes };
+    STORE.calendarWeeks[currentCycleWeek] = STORE.calendarWeeks[currentCycleWeek] || {};
+    STORE.calendarWeeks[currentCycleWeek][key] = true;
+    STORE.dayLogs.push({ day: key, week: currentCycleWeek, timestamp: new Date().toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}), changes });
+    markDayDoneVisual(key);
+    STORE.pendingDayResults[key] = [];
+    persistToLocalStorage();
+
+    const coreDone = ['d1','d2','d3','d5'].every(k => STORE.cycleProgress[k]?.done);
+    const altDone = STORE.cycleProgress['d4a']?.done || STORE.cycleProgress['d4b']?.done;
+    const cycleComplete = coreDone && altDone;
+
+    if(cycleComplete){
+      const finishedWeek = currentCycleWeek;
+      captureWeekSummary(finishedWeek);
+      currentCycleWeek += 1;
+      updateWeekBadge();
+      const panel = document.createElement('div'); panel.className = 'results-panel';
+      panel.innerHTML = `<div class="results-row" style="border-bottom:none;"><span class="results-name">All 5 days done — Week ${finishedWeek} summary saved. Now Week ${currentCycleWeek}. Opening Day 1 with updated numbers...</span></div>`;
+      dayCompleteBtn.insertAdjacentElement('afterend', panel);
+      dayCompleteBtn.style.display = 'none';
+      setTimeout(()=>{ STORE.cycleProgress = {}; STORE.currentCycleWeek = currentCycleWeek; persistToLocalStorage(); resetCycleVisual(); renderDay('d1'); }, 1400);
+    } else { renderWrapUp(key); }
+  };
+}
+
+async function renderExerciseCard(exercise, exactMode, dayResults){
+  const card = document.createElement('div');
+  card.className = 'card';
+  const data = await loadExercise(exercise.id);
+  const workingWeight = data.weight ?? exercise.weight;
+  const last = data.history[data.history.length-1];
+  const lastClean = last ? historyClean(last) : true;
+  const targetReps = data.targetReps ?? (exercise.startTarget ?? exercise.repMin);
+  if(last) card.classList.add('logged-flag');
+  const perSet = hasPerSetWeight(exercise);
+
+  const currentLabel = exactMode
+    ? `${targetReps} reps × ${exercise.sets}`
+    : exercise.unit === 'sec' ? `${exercise.repMin}sec × ${exercise.sets}`
+    : exercise.unit === 'min' ? `${exercise.repMin}–${exercise.repMax} min`
+    : (exercise.repMin===exercise.repMax ? `${exercise.repMin} reps` : `${exercise.repMin}–${exercise.repMax} reps`) + ` × ${exercise.sets}`;
+  const rangeSubLabel = exactMode ? `range ${exercise.repMin}–${exercise.repMax}` : '';
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="card-check">✓</div>
+        <p class="ex-name">${exercise.name}</p>
+      </div>
+      <div class="card-header-right">
+        <div>
+          <div class="ex-range">${currentLabel}</div>
+          ${rangeSubLabel ? `<div class="ex-range-sub">${rangeSubLabel}</div>` : ''}
+        </div>
+        <div class="chevron">▾</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-body-inner">
+        <div class="rest-label">Rest ${restLabel(restFor(exercise.id))}</div>
+        ${exercise.note ? `<p class="ex-note">${exercise.note}</p>` : ''}
+        ${last ? `<div class="last-log">Last: ${historyWeightsLabel(last, exercise.unit)}${last.sets.join(', ')} ${exercise.unit==='sec'?'sec':exercise.unit==='min'?'min':'reps'}${!lastClean?' ⚠ not clean':''} <span style="opacity:0.6">(${last.date})</span></div>` : ''}
+        ${data.painFlag ? `<div class="pain-banner"><span>⚠ Flagged for pain/issue — progression is held until cleared.</span><button type="button" class="pain-clear-btn">Clear</button></div>` : ''}
+
+        ${exercise.unit==='min' ? `
+        <div class="fill-row">
+          <div class="fill-field"><span>target min</span><input type="number" class="weight-field" value="${workingWeight || ''}" step="1"></div>
+        </div>` : ''}
+
+        <div class="set-table">
+          <div class="set-table-head ${perSet ? 'cols-4' : 'cols-3'}">
+            <span></span>${perSet ? `<span>Weight</span>` : ''}<span>Reps</span><span></span>
+          </div>
+          ${Array.from({length: exercise.sets}).map((_, i) => `
+            <div class="set-row ${perSet ? 'cols-4' : 'cols-3'}">
+              <span class="set-num">${exercise.unit==='min' ? '·' : (i+1)}</span>
+              ${perSet ? `<div class="set-field"><input type="number" class="weight-field-set" placeholder="${workingWeight||exercise.weight||''}" value="${workingWeight||''}" step="2.5"></div>` : ''}
+              <div class="set-field"><input type="number" class="rep-field" placeholder="${exactMode ? targetReps : (exercise.unit==='sec'?'sec':exercise.unit==='min'?'min':'reps')}"></div>
+              <button type="button" class="set-clean-toggle" data-clean="true" title="Tap if this set wasn't clean">✓</button>
+            </div>
+            <div class="breakdown-row" style="display:none;">
+              <span>Broke down at rep #</span>
+              <input type="number" class="breakdown-field" placeholder="optional">
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="fill-row" style="${exercise.sets<2?'display:none;':''}">
+          <div class="fill-field"><span>fill reps</span><input type="number" class="fill-all-field" value="${exactMode?targetReps:''}"></div>
+          ${perSet ? `<div class="fill-field"><span>fill weight</span><input type="number" class="fill-all-weight-field" value="${workingWeight||''}"></div>` : ''}
+          <button type="button" class="fill-btn fill-all-btn">Fill all</button>
+        </div>
+
+        <div class="effort-row">
+          <div class="effort-label">How did it feel?</div>
+          <div class="effort-btns">
+            <button type="button" class="effort-btn" data-effort="easy">Easy</button>
+            <button type="button" class="effort-btn active" data-effort="moderate">Moderate</button>
+            <button type="button" class="effort-btn" data-effort="max">Max effort</button>
+          </div>
+        </div>
+        <div class="pain-row">
+          <span style="font-size:12px;color:var(--text-dim);">Pain or an issue this session?</span>
+          <button type="button" class="pain-toggle" data-pain="false">Flag it</button>
+        </div>
+
+        <div class="card-actions"><button class="btn btn-primary log-btn">Log set${exercise.sets>1?'s':''}</button></div>
+        <div class="fb-slot"></div>
+        <div style="display:flex;gap:14px;align-items:center;">
+          <button class="toggle-hist" style="display:${data.history.length?'block':'none'}">History (${data.history.length})</button>
+          <button class="undo-log-btn" style="display:${data.history.length?'block':'none'};background:none;border:none;color:var(--warn);font-size:12px;cursor:pointer;padding:6px 0;font-family:'Inter',sans-serif;font-weight:600;">Undo last log</button>
+        </div>
+        <div class="history" style="display:none;"></div>
+      </div>
+    </div>
+  `;
+
+  card.querySelector('.card-header').onclick = ()=>{
+    const body = card.querySelector('.card-body');
+    if(body.style.maxHeight && body.style.maxHeight !== '0px'){ collapseCard(card); } else { expandCard(card); }
+  };
+
+  card.querySelectorAll('.set-clean-toggle').forEach(b=>{
+    b.onclick = (e)=>{
+      e.stopPropagation();
+      const isClean = b.dataset.clean === 'true';
+      b.dataset.clean = isClean ? 'false' : 'true';
+      b.classList.toggle('dirty', isClean);
+      b.textContent = isClean ? '✗' : '✓';
+      const breakdownRow = b.closest('.set-row').nextElementSibling;
+      if(breakdownRow && breakdownRow.classList.contains('breakdown-row')){
+        breakdownRow.style.display = isClean ? 'flex' : 'none';
+        if(isClean) breakdownRow.querySelector('.breakdown-field').value = '';
+      }
+    };
+  });
+  card.querySelectorAll('.effort-btn').forEach(b=>{
+    b.onclick = (e)=>{
+      e.stopPropagation();
+      card.querySelectorAll('.effort-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    };
+  });
+  const painToggle = card.querySelector('.pain-toggle');
+  if(painToggle){
+    painToggle.onclick = (e)=>{
+      e.stopPropagation();
+      const active = painToggle.dataset.pain === 'true';
+      painToggle.dataset.pain = active ? 'false' : 'true';
+      painToggle.classList.toggle('active', !active);
+      painToggle.textContent = active ? 'Flag it' : '⚠ Flagged';
+    };
+  }
+  const painClearBtn = card.querySelector('.pain-clear-btn');
+  if(painClearBtn){
+    painClearBtn.onclick = async (e)=>{
+      e.stopPropagation();
+      const data = await loadExercise(exercise.id);
+      data.painFlag = false;
+      await saveExercise(exercise.id, data);
+      renderDay(activeDay, true);
+    };
+  }
+  const fillBtn = card.querySelector('.fill-all-btn');
+  if(fillBtn){
+    fillBtn.onclick = (e)=>{
+      e.stopPropagation();
+      const repVal = card.querySelector('.fill-all-field').value;
+      if(repVal !== '') card.querySelectorAll('.rep-field').forEach(f => f.value = repVal);
+      const weightFillField = card.querySelector('.fill-all-weight-field');
+      if(weightFillField && weightFillField.value !== '') card.querySelectorAll('.weight-field-set').forEach(f => f.value = weightFillField.value);
+    };
+  }
+  card.querySelector('.log-btn').onclick = async (e)=>{
+    e.stopPropagation();
+    const repFields = [...card.querySelectorAll('.rep-field')];
+    const cleanToggles = [...card.querySelectorAll('.set-clean-toggle')];
+    const breakdownFields = [...card.querySelectorAll('.breakdown-field')];
+    const weightFields = perSet ? [...card.querySelectorAll('.weight-field-set')] : null;
+    const minWeightField = exercise.unit==='min' ? card.querySelector('.weight-field') : null;
+
+    const pairs = repFields.map((f,i)=>({
+      rep: parseInt(f.value),
+      clean: cleanToggles[i] ? cleanToggles[i].dataset.clean === 'true' : true,
+      weight: weightFields ? (parseFloat(weightFields[i].value) || 0) : null,
+      breakdown: breakdownFields[i] && breakdownFields[i].value !== '' ? parseInt(breakdownFields[i].value) : null
+    })).filter(p=>!isNaN(p.rep));
+
+    if(pairs.length===0){ showFeedback(card, 'fb-build', 'Enter at least one set before logging.'); return; }
+    const reps = pairs.map(p=>p.rep);
+    const cleanFlags = pairs.map(p=>p.clean);
+    const breakdownReps = pairs.map(p=>p.breakdown);
+    const weights = perSet ? pairs.map(p=>p.weight) : (exercise.unit==='min' ? [parseFloat(minWeightField.value)||0] : null);
+    const effortBtn = card.querySelector('.effort-btn.active');
+    const effort = effortBtn ? effortBtn.dataset.effort : 'moderate';
+    const painToggleEl = card.querySelector('.pain-toggle');
+    const painFlagged = painToggleEl ? painToggleEl.dataset.pain === 'true' : false;
+
+    const result = await computeLog(exercise, exactMode, weights, reps, cleanFlags, effort, painFlagged, breakdownReps);
+    applyResultToCard(card, exercise, result);
+    if(dayResults){ dayResults.push({ name: exercise.name, change: result.change }); persistToLocalStorage(); }
+    setTimeout(()=>{ if(card._advance) card._advance(); }, 900);
+  };
+
+  const histBtn = card.querySelector('.toggle-hist');
+  const histDiv = card.querySelector('.history');
+  histDiv.innerHTML = data.history.slice().reverse().map(h=>{
+    const anyDirty = !historyClean(h);
+    return `<div class="history-row"><span>${h.date}${anyDirty?' ⚠':''}</span><span>${historyWeightsLabel(h, exercise.unit)}${h.sets.join(', ')}</span></div>`;
+  }).join('');
+  histBtn.onclick = (e)=>{ e.stopPropagation(); histDiv.style.display = histDiv.style.display==='none' ? 'block' : 'none'; };
+
+  const undoBtn = card.querySelector('.undo-log-btn');
+  if(undoBtn){
+    undoBtn.onclick = async (e)=>{
+      e.stopPropagation();
+      const restored = await undoLastLog(exercise.id);
+      if(!restored) return;
+      renderDay(activeDay, true);
+    };
+  }
+  return card;
+}
+
+loadFromLocalStorage();
+if(!STORE.program){ STORE.program = PROGRAM; persistToLocalStorage(); }
+if(STORE.currentCycleWeek){ currentCycleWeek = STORE.currentCycleWeek; updateWeekBadge(); }
+document.getElementById('notesArea').value = STORE.notes;
+if(Object.keys(STORE.cycleProgress).length || Object.keys(STORE.exercises).length){
+  document.getElementById('saveStatus').textContent = 'Loaded your saved progress ✓';
+  document.getElementById('saveStatus').className = 'save-status ok';
+}
+renderWeekStrip();
+renderDay(activeDay);
+</script>
+</body>
+</html>
